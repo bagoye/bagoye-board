@@ -11,7 +11,7 @@ interface Props {
 // component: Board List Item 컴포넌트
 export default function BoardItem({ boardListItme }: Props) {
 
-  // properties
+  // state: properties
   const { boardNumber, title, content, boardTitleImage } = boardListItme;
   const { favoriteCount, commentCount, viewCount } = boardListItme;
   const { writeDatetime, writerNickname, writerProfileImage } = boardListItme;

@@ -11,7 +11,7 @@ interface Props {
 // component: Top3 List Item 컴포넌트
 export default function Top3Item({ top3ListItme }: Props) {
 
-    // properties
+    // state: properties
     const { boardNumber, title, content, boardTitleImage } = top3ListItme;
     const { favoriteCount, commentCount, viewCount } = top3ListItme;
     const { writeDatetime, writerNickname, writerProfileImage } = top3ListItme;
@@ -19,7 +19,7 @@ export default function Top3Item({ top3ListItme }: Props) {
     // function: 네비게이트 함수
     // const navigater = useNavigate();
 
-    // evnet handler: 게시물 아이템 클릭 이벤트 처리 함수
+    // event handler: 게시물 아이템 클릭 이벤트 처리 함수
     const onClickHandler = () => {
         // navigator(boardNumber);
     }
