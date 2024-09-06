@@ -1,8 +1,10 @@
 package com.bagoye.board.controller;
 
+import com.bagoye.board.dto.request.auth.SignInRequestDto;
 import com.bagoye.board.dto.request.auth.SignUpRequestDto;
+import com.bagoye.board.dto.response.auth.SignInResponseDto;
 import com.bagoye.board.dto.response.auth.SignUpResponseDto;
-import com.bagoye.board.service.implement.AuthService;
+import com.bagoye.board.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,13 @@ public class AuthController {
     ) {
         ResponseEntity<? super SignUpResponseDto> response = authService.signUp(requestBody);
         return response;
+    }
 
+    @PostMapping("/sign-in")
+    public ResponseEntity<? super SignInResponseDto> signIn(
+            @RequestBody @Valid SignInRequestDto requestBody
+    ) {
+        ResponseEntity<? super SignInResponseDto> response = authService.signIn(requestBody);
+        return response;
     }
 }
