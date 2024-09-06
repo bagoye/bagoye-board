@@ -25,5 +25,5 @@ spring:
       max-request-size: 110MB
 
 jwt:
-  secret-key: secretkey
+  secret-key: secretkeyhihihihihihihihihihiasdfjasjdkfhjaskdlf
 
