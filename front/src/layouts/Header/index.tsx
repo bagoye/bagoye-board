@@ -120,7 +120,6 @@ export default function Header() {
     // component: 마이페이지 버튼 컴포넌트
     const MyPageButton = () => {
 
-
         // state: userEmail path variable 상태
         const { userEmail } = useParams();
 
@@ -128,12 +127,13 @@ export default function Header() {
         const onMyPageButtonClickHandler = () => {
             if (!loginUser) return;
             const { email } = loginUser;
-            navigate(USER_PATH('email'));
+            navigate(USER_PATH(email));
         }
 
         // event handler: 로그아웃 버튼 클릭 이벤트 처리 함수
         const onSignOutButtonClickHandler = () => {
             resetLoginUser();
+            setCookie('accessToken', '', { path: MAIN_PATH(), expires: new Date() })
             navigate(MAIN_PATH());
         }
 
@@ -162,18 +162,14 @@ export default function Header() {
 
         // event handler: 업로드 버튼 클릭 이벤트 처리 함수
         const onUploadButtonClickHandler = () => {
-
         }
 
         // render: 업로드 버튼 컴포넌트 렌더링
         if (title && content)
             return <div className='black-button' onClick={onUploadButtonClickHandler}>{'업로드'}</div>
 
-
         // render: 업로드 불가 버튼 컴포넌트 렌더링
         return <div className='disable-button'>{'업로드'}</div>
-
-
     }
 
     // effect: path가 변경될 때마다 실행될 함수
@@ -193,6 +189,11 @@ export default function Header() {
         const isUserPage = pathname.startsWith(USER_PATH(''));
         setUserPage(isUserPage);
     }, [pathname])
+
+    // effect: login user가 변경될 때마다 실행될 함수
+    useEffect(() => {
+        setLogin(loginUser !== null);
+    }, [loginUser])
 
     // render: Header 레이아웃 렌더링
     return (
