@@ -27,3 +27,5 @@ spring:
 jwt:
   secret-key: secretkeyhihihihihihihihihihiasdfjasjdkfhjaskdlf
 
+file.path: /Users/yiisuyeon/Desktop/fileUpload/
+file.url: http://localhost:8080/file/
