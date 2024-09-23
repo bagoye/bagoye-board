@@ -2,6 +2,7 @@ package com.bagoye.board.controller;
 
 import com.bagoye.board.dto.request.board.PostBoardRequestDto;
 import com.bagoye.board.dto.response.board.GetBoardResponseDto;
+import com.bagoye.board.dto.response.board.GetFavoriteListResponseDto;
 import com.bagoye.board.dto.response.board.PostBoardResponseDto;
 import com.bagoye.board.dto.response.board.PutFavoriteResponseDto;
 import com.bagoye.board.service.BoardService;
@@ -25,6 +26,14 @@ public class BoardController {
         ResponseEntity<? super GetBoardResponseDto> response = boardService.getBoard(boardNumber);
         return response;
 
+    }
+
+    @GetMapping("/{boardNumber}/favorite-list")
+    public ResponseEntity<? super GetFavoriteListResponseDto> getFavoriteList (
+            @PathVariable("boardNumber") Integer boardNumber
+    ) {
+        ResponseEntity<? super GetFavoriteListResponseDto> response = boardService.getFavoriteList(boardNumber);
+        return response;
     }
 
     @PostMapping("")

@@ -3,6 +3,7 @@ package com.bagoye.board.service.implement;
 import com.bagoye.board.dto.request.board.PostBoardRequestDto;
 import com.bagoye.board.dto.response.ResponseDto;
 import com.bagoye.board.dto.response.board.GetBoardResponseDto;
+import com.bagoye.board.dto.response.board.GetFavoriteListResponseDto;
 import com.bagoye.board.dto.response.board.PostBoardResponseDto;
 import com.bagoye.board.dto.response.board.PutFavoriteResponseDto;
 import com.bagoye.board.entity.BoardEntity;
@@ -13,6 +14,7 @@ import com.bagoye.board.repository.FavoriteRepository;
 import com.bagoye.board.repository.ImageRepository;
 import com.bagoye.board.repository.UserRepository;
 import com.bagoye.board.repository.resultSet.GetBoardResultSet;
+import com.bagoye.board.repository.resultSet.GetFavoriteListResultSet;
 import com.bagoye.board.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +55,26 @@ public class BoardServiceImplement implements BoardService {
         }
 
         return GetBoardResponseDto.success(resultSet, imageEntities);
+    }
+
+    @Override
+    public ResponseEntity<? super GetFavoriteListResponseDto> getFavoriteList(Integer boardNumber) {
+
+        List<GetFavoriteListResultSet> resultSets = new ArrayList<>();
+
+        try {
+
+            boolean existedBoard = boardRepository.existsByBoardNumber(boardNumber);
+            if (!existedBoard) return GetFavoriteListResponseDto.noExistBoard();
+
+            resultSets = favoriteRepository.getFavoriteList(boardNumber);
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+
+        return GetFavoriteListResponseDto.success(resultSets);
     }
 
     @Override
