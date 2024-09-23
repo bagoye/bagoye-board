@@ -2,12 +2,14 @@ package com.bagoye.board.service.implement;
 
 import com.bagoye.board.dto.request.board.PostBoardRequestDto;
 import com.bagoye.board.dto.response.ResponseDto;
+import com.bagoye.board.dto.response.board.GetBoardResponseDto;
 import com.bagoye.board.dto.response.board.PostBoardResponseDto;
 import com.bagoye.board.entity.BoardEntity;
 import com.bagoye.board.entity.ImageEntity;
 import com.bagoye.board.repository.BoardRepository;
 import com.bagoye.board.repository.ImageRepository;
 import com.bagoye.board.repository.UserRepository;
+import com.bagoye.board.repository.resultSet.GetBoardResultSet;
 import com.bagoye.board.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +25,31 @@ public class BoardServiceImplement implements BoardService {
     private final UserRepository userRepository;
     private final BoardRepository boardRepository;
     private final ImageRepository imageRepository;
+
+    @Override
+    public ResponseEntity<? super GetBoardResponseDto> getBoard(Integer boardNumber) {
+
+        GetBoardResultSet resultSet = null;
+        List<ImageEntity> imageEntities = new ArrayList<>();
+
+        try {
+
+            resultSet = boardRepository.getBoard(boardNumber);
+            if(resultSet == null) return GetBoardResponseDto.noExistBoard();
+
+            imageEntities = imageRepository.findByBoardNumber(boardNumber);
+
+            BoardEntity boardEntity = boardRepository.findByBoardNumber(boardNumber);
+            boardEntity.increaseViewCount();
+            boardRepository.save(boardEntity);
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+
+        return GetBoardResponseDto.success(resultSet, imageEntities);
+    }
 
     @Override
     public ResponseEntity<? super PostBoardResponseDto> postBoard(PostBoardRequestDto dto, String email) {
