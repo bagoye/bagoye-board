@@ -1,16 +1,14 @@
 package com.bagoye.board.controller;
 
 import com.bagoye.board.dto.request.board.PostBoardRequestDto;
+import com.bagoye.board.dto.response.board.GetBoardResponseDto;
 import com.bagoye.board.dto.response.board.PostBoardResponseDto;
 import com.bagoye.board.service.BoardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/board")
@@ -18,6 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class BoardController {
 
     private final BoardService boardService;
+
+    @GetMapping("/{boardNumber}")
+    public ResponseEntity<? super GetBoardResponseDto> getBoard(
+            @PathVariable("boardNumber") Integer boardNumber
+    ) {
+        ResponseEntity<? super GetBoardResponseDto> response = boardService.getBoard(boardNumber);
+        return response;
+
+    }
 
     @PostMapping("")
     public ResponseEntity<? super PostBoardResponseDto> postBoard(
