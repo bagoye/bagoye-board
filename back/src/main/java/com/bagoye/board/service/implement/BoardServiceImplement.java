@@ -1,18 +1,14 @@
 package com.bagoye.board.service.implement;
 
 import com.bagoye.board.dto.request.board.PostBoardRequestDto;
+import com.bagoye.board.dto.request.board.PostCommentRequestDto;
 import com.bagoye.board.dto.response.ResponseDto;
-import com.bagoye.board.dto.response.board.GetBoardResponseDto;
-import com.bagoye.board.dto.response.board.GetFavoriteListResponseDto;
-import com.bagoye.board.dto.response.board.PostBoardResponseDto;
-import com.bagoye.board.dto.response.board.PutFavoriteResponseDto;
+import com.bagoye.board.dto.response.board.*;
 import com.bagoye.board.entity.BoardEntity;
+import com.bagoye.board.entity.CommentEntity;
 import com.bagoye.board.entity.FavoriteEntity;
 import com.bagoye.board.entity.ImageEntity;
-import com.bagoye.board.repository.BoardRepository;
-import com.bagoye.board.repository.FavoriteRepository;
-import com.bagoye.board.repository.ImageRepository;
-import com.bagoye.board.repository.UserRepository;
+import com.bagoye.board.repository.*;
 import com.bagoye.board.repository.resultSet.GetBoardResultSet;
 import com.bagoye.board.repository.resultSet.GetFavoriteListResultSet;
 import com.bagoye.board.service.BoardService;
@@ -30,6 +26,7 @@ public class BoardServiceImplement implements BoardService {
     private final UserRepository userRepository;
     private final BoardRepository boardRepository;
     private final ImageRepository imageRepository;
+    private final CommentRepository commentRepository;
     private final FavoriteRepository favoriteRepository;
 
     @Override
@@ -108,6 +105,32 @@ public class BoardServiceImplement implements BoardService {
 
         return PostBoardResponseDto.success();
     }
+
+    @Override
+    public ResponseEntity<? super PostCommentResponseDto> postComment(PostCommentRequestDto dto, Integer boardNumber, String email) {
+
+        try {
+
+            BoardEntity boardEntity = boardRepository.findByBoardNumber(boardNumber);
+            if (boardEntity == null) return PostCommentResponseDto.noExistBoard();
+
+            boolean existedUser = userRepository.existsByEmail(email);
+            if (!existedUser) return PostCommentResponseDto.noExistUser();
+
+            CommentEntity commentEntity = new CommentEntity(dto, boardNumber, email);
+            commentRepository.save(commentEntity);
+
+            boardEntity.increaseCommentCount();
+            boardRepository.save(boardEntity);
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+
+        return PostCommentResponseDto.success();
+    }
+
 
     @Override
     public ResponseEntity<? super PutFavoriteResponseDto> putFavorite(Integer boardNumber, String email) {

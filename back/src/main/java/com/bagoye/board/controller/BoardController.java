@@ -1,10 +1,8 @@
 package com.bagoye.board.controller;
 
 import com.bagoye.board.dto.request.board.PostBoardRequestDto;
-import com.bagoye.board.dto.response.board.GetBoardResponseDto;
-import com.bagoye.board.dto.response.board.GetFavoriteListResponseDto;
-import com.bagoye.board.dto.response.board.PostBoardResponseDto;
-import com.bagoye.board.dto.response.board.PutFavoriteResponseDto;
+import com.bagoye.board.dto.request.board.PostCommentRequestDto;
+import com.bagoye.board.dto.response.board.*;
 import com.bagoye.board.service.BoardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +40,16 @@ public class BoardController {
             @AuthenticationPrincipal String email
             ) {
         ResponseEntity<? super PostBoardResponseDto> response = boardService.postBoard(requestBody, email);
+        return response;
+    }
+
+    @PostMapping("/{boardNumber}/comment")
+    public ResponseEntity<? super PostCommentResponseDto> postComment(
+            @RequestBody @Valid PostCommentRequestDto requestBody,
+            @PathVariable("boardNumber") Integer boardNumber,
+            @AuthenticationPrincipal String email
+    ) {
+        ResponseEntity<? super PostCommentResponseDto> response = boardService.postComment(requestBody, boardNumber, email);
         return response;
     }
 
