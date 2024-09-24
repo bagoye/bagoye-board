@@ -10,6 +10,7 @@ import com.bagoye.board.entity.FavoriteEntity;
 import com.bagoye.board.entity.ImageEntity;
 import com.bagoye.board.repository.*;
 import com.bagoye.board.repository.resultSet.GetBoardResultSet;
+import com.bagoye.board.repository.resultSet.GetCommentListResultSet;
 import com.bagoye.board.repository.resultSet.GetFavoriteListResultSet;
 import com.bagoye.board.service.BoardService;
 import lombok.RequiredArgsConstructor;
@@ -72,6 +73,26 @@ public class BoardServiceImplement implements BoardService {
         }
 
         return GetFavoriteListResponseDto.success(resultSets);
+    }
+
+    @Override
+    public ResponseEntity<? super GetCommentListResponseDto> getCommentList(Integer boardNumber) {
+
+        List<GetCommentListResultSet> resultSets = new ArrayList<>();
+
+        try {
+
+            boolean existedBoard = boardRepository.existsByBoardNumber(boardNumber);
+            if (!existedBoard) return GetCommentListResponseDto.noExistBoard();
+
+            resultSets = commentRepository.getCommentList(boardNumber);
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+
+        return GetCommentListResponseDto.success(resultSets);
     }
 
     @Override
