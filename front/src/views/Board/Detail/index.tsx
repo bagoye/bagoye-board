@@ -6,11 +6,21 @@ import { commentListMock, favoriteListMock } from 'mocks';
 import CommentItem from 'components/CommentItem';
 import Pagination from 'components/Pagination';
 
+import defaultProfileImage from 'assets/image/default-profile-image.png'
+
 // component: 게시물 상세 화면 컴포넌트
 export default function BoardDetail() {
 
   // component: 게시물 상세 상단 컴포넌트
   const BoardDetailTop = () => {
+
+    // state: more 버튼 상태
+    const [showMore, setShowMore] = useState<boolean>(false);
+
+    // event handler: more 버튼 클릭 이벤트 처리
+    const onMoreButtonClickHandler = () => {
+      setShowMore(!showMore);
+    }
 
     // render: 게시물 상세 상단 컴포넌트 렌더링
     return (
@@ -19,25 +29,27 @@ export default function BoardDetail() {
           <div className='board-detail-title'>{'타이틀타이틀 ~,~'}</div>
           <div className='board-detail-top-sub-box'>
             <div className='board-detail-write-info-box'>
-              <div className='board-detail-writer-profile-image'></div>
+              <div className='board-detail-writer-profile-image' style={{ backgroundImage: `url(${defaultProfileImage})` }}></div>
               <div className='board-detail-writer-nickname'>{'닉네임'}</div>
               <div className='board-detail-info-divider'>{'\|'}</div>
               <div className='board-detail-write-date'>{'2024. 09. 24'}</div>
             </div>
-            <div className='icon-button'>
+            <div className='icon-button' onClick={onMoreButtonClickHandler}>
               <div className='icon more-icon'></div>
             </div>
-            <div className='board-detail-more-box'>
-              <div className='board-detail-update-button'>{'수정'}</div>
-              <div className='divider'></div>
-              <div className='board-detail-delete-button'>{'삭제'}</div>
-            </div>
+            {showMore &&
+              <div className='board-detail-more-box'>
+                <div className='board-detail-update-button'>{'수정'}</div>
+                <div className='divider'></div>
+                <div className='board-detail-delete-button'>{'삭제'}</div>
+              </div>
+            }
           </div>
         </div>
         <div className='divider'></div>
         <div className='board-detail-top-main'>
           <div className='board-detail-main-text'>{'글글글글글하이하이'}</div>
-          <div className='board-detail-main-image'></div>
+          <img className='board-detail-main-image' src='https://mblogthumb-phinf.pstatic.net/MjAyMjAxMjVfMjAy/MDAxNjQzMTAyOTk2NjE0.gw_H_jjBM64svaftcnheR6-mHHlmGOyrr6htAuxPETsg.8JJSQNEA5HX2WmrshjZ-VjmJWqhmgE40Qm5csIud9VUg.JPEG.minziminzi128/IMG_7374.JPG?type=w800' />
         </div>
       </div>
     );
