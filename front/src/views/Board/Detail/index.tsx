@@ -61,7 +61,7 @@ export default function BoardDetail() {
 
     const [favoriteList, setFavoriteList] = useState<FavoriteListItem[]>([]);
     const [commentList, setCommentList] = useState<CommentListItem[]>([]);
-    // effect: 
+    
     useEffect(() => {
       setFavoriteList(favoriteListMock);
       setCommentList(commentListMock);
@@ -109,7 +109,7 @@ export default function BoardDetail() {
           <div className='board-detail-bottom-comment-pagination-box'>
             <Pagination />
           </div>
-          <div className='board-detail-bottom-comment-input-container'>
+          <div className='board-detail-bottom-comment-input-box'>
             <div className='board-detail-bottom-comment-input-container'>
               <textarea className='board-detail-bottom-comment-textare' placeholder='댓글을 작성해주세요.' />
               <div className='board-detail-bottom-comment-button-box'>
