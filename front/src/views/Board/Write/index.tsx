@@ -88,7 +88,6 @@ export default function BoardWrite() {
     setBoardImageFileList(newBoardImageFileList);
   }
 
-
   // effect: 마운트 시 실행할 함수
   useEffect(() => {
     const accessToken = cookies.accessToken;

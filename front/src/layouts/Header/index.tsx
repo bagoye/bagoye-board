@@ -45,8 +45,6 @@ export default function Header() {
     // state: 유저 페이지 상태
     const [isUserPage, setUserPage] = useState<boolean>(false);
 
-
-
     // function: 네비게이트 함수
     const navigate = useNavigate();
 
@@ -69,7 +67,6 @@ export default function Header() {
 
         // state: 검색어 path variable 상태
         const { searchWord } = useParams();
-
 
         // event handler: 검색어 변경 이벤트 처리 함수
         const onSearchWordChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
@@ -99,7 +96,6 @@ export default function Header() {
             if (searchWord) setWord(searchWord);
             setStatus(true);
         }, [searchWord])
-
 
         if (!status)
             // render 검색 버튼 컴포넌트 렌더링 (클릭 false 상태)

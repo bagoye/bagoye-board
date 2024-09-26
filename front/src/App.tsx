@@ -48,7 +48,6 @@ function App() {
     getSignInUserRequest(cookies.accessToken).then(getSignInUserResponse);
   }, [cookies.accessToken])
 
-
   // render: Appication 컴포넌트 렌더링
   // description: 메인 화면: '/' - Main
   // description: 로그인 + 회원가입 화면: '/auth' - Authentication
