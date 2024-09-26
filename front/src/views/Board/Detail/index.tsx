@@ -2,7 +2,7 @@ import React, { ChangeEvent, useEffect, useRef, useState } from 'react'
 import './style.css'
 import FavoriteItem from 'components/favoriteItem';
 import { Board, CommentListItem, FavoriteListItem } from 'types/interface';
-import { boardMock, commentListMock, favoriteListMock } from 'mocks';
+import { commentListMock } from 'mocks';
 import CommentItem from 'components/CommentItem';
 import Pagination from 'components/Pagination';
 
@@ -10,10 +10,12 @@ import defaultProfileImage from 'assets/image/default-profile-image.png'
 import { useLoginUserStore } from 'stores';
 import { useNavigate, useParams } from 'react-router-dom';
 import { BOARD_PATH, BOARD_UPDATE_PATH, MAIN_PATH, USER_PATH } from 'constant';
-import { getBoardResquest, increaseViewCountRequest } from 'apis';
+import { getBoardResquest, getCommentListRequest, getFavoriteListRequest, increaseViewCountRequest } from 'apis';
 import GetBoardResponseDto from 'apis/response/board/get-board.response.dto';
 import { ResponseDto } from 'apis/response';
-import { IncreaseViewCountResponseDto } from 'apis/response/board';
+import { GetCommentListResponseDto, GetFavoriteListResponseDto, IncreaseViewCountResponseDto } from 'apis/response/board';
+
+import dayjs from 'dayjs';
 
 // component: 게시물 상세 화면 컴포넌트
 export default function BoardDetail() {
@@ -47,10 +49,19 @@ export default function BoardDetail() {
     // state: more 버튼 상태
     const [showMore, setShowMore] = useState<boolean>(false);
 
+    // function: 작성일 포맷 변경 함수
+    const getWriteDatetimeFormat = () => {
+      if (!board) return '';
+      const date = dayjs(board.writeDatetime);
+      return date.format('YYYY. MM. DD');
+    }
+
     // function: getBoardResponse 처리 함수
     const getBoardResponse = (responseBody: GetBoardResponseDto | ResponseDto | null) => {
       if (!responseBody) return;
       const { code } = responseBody;
+
+      console.log('게시물 데이터:', responseBody);
       if (code === 'NB') alert('존재하지 않는 게시물입니다.');
       if (code === "DBE") alert('데이터베이스 오류입니다.');
       if (code !== 'SU') {
@@ -115,7 +126,7 @@ export default function BoardDetail() {
               <div className='board-detail-writer-profile-image' style={{ backgroundImage: `url(${board.writerProfileImage ? board.writerProfileImage : defaultProfileImage})` }}></div>
               <div className='board-detail-writer-nickname' onClick={onNicknameClickHandler}>{board.writerNickname}</div>
               <div className='board-detail-info-divider'>{'\|'}</div>
-              <div className='board-detail-write-date'>{board.writeDatetime}</div>
+              <div className='board-detail-write-date'>{getWriteDatetimeFormat()}</div>
             </div>
             {isWriter &&
               <div className='icon-button' onClick={onMoreButtonClickHandler}>
@@ -164,6 +175,38 @@ export default function BoardDetail() {
     // state: 댓글 상태
     const [comment, setComment] = useState<string>('');
 
+    // function: getFavoriteListResponse 처리 함수
+    const getFavoriteListResponse = (responseBody: GetFavoriteListResponseDto | ResponseDto | null) => {
+      if (!responseBody) return;
+      const { code } = responseBody;
+      if (code === "NB") alert('존재하지 않는 게시물입니다.');
+      if (code === "DBE") alert('데이터베이스 오류입니다.');
+      if (code !== 'SU') return;
+
+      const { favoriteList } = responseBody as GetFavoriteListResponseDto;
+      setFavoriteList(favoriteList);
+
+      if (!loginUser) {
+        setFavorite(false);
+        return;
+      }
+
+      const isFavorite = favoriteList.findIndex(favorite => favorite.email === loginUser.email) !== -1;
+      setFavorite(isFavorite);
+    }
+
+    // function: getCommentListResponse 처리 함수
+    const getCommentListResponse = (responseBody: GetCommentListResponseDto | ResponseDto | null) => {
+      if (!responseBody) return;
+      const { code } = responseBody;
+      if (code === "NB") alert('존재하지 않는 게시물입니다.');
+      if (code === "DBE") alert('데이터베이스 오류입니다.');
+      if (code !== 'SU') return;
+
+      const { commentList } = responseBody as GetCommentListResponseDto;
+      setCommentList(commentList);
+    }
+
     // event handler: 좋아요 클릭 이벤트 처리
     const onFavoriteClickHandler = () => {
       setFavorite(!isFavorite);
@@ -196,8 +239,9 @@ export default function BoardDetail() {
 
     // effect: 게시물 번호 path variable이 바뀔때마다 좋아요 및 댓글 리스트 불러오기
     useEffect(() => {
-      setFavoriteList(favoriteListMock);
-      setCommentList(commentListMock);
+      if (!boardNumber) return;
+      getFavoriteListRequest(boardNumber).then(getFavoriteListResponse);
+      getCommentListRequest(boardNumber).then(getCommentListResponse);
     }, [boardNumber])
 
     // render: 게시물 상세 하단 컴포넌트 렌더링
@@ -254,14 +298,16 @@ export default function BoardDetail() {
             <div className='board-detail-bottom-comment-pagination-box'>
               <Pagination />
             </div>
-            <div className='board-detail-bottom-comment-input-box'>
-              <div className='board-detail-bottom-comment-input-container'>
-                <textarea ref={commentRef} className='board-detail-bottom-comment-textare' placeholder='댓글을 작성해주세요.' value={comment} onChange={onCommentChangeHandler} />
-                <div className='board-detail-bottom-comment-button-box'>
-                  <div className={comment === '' ? 'disable-button' : 'black-button'} onClick={onCommentSubmitButtonClickHandler}> {'댓글쓰기'}</div>
+            {loginUser !== null &&
+              <div className='board-detail-bottom-comment-input-box'>
+                <div className='board-detail-bottom-comment-input-container'>
+                  <textarea ref={commentRef} className='board-detail-bottom-comment-textare' placeholder='댓글을 작성해주세요.' value={comment} onChange={onCommentChangeHandler} />
+                  <div className='board-detail-bottom-comment-button-box'>
+                    <div className={comment === '' ? 'disable-button' : 'black-button'} onClick={onCommentSubmitButtonClickHandler}> {'댓글쓰기'}</div>
+                  </div>
                 </div>
               </div>
-            </div>
+            }
           </div>
         }
       </div >
