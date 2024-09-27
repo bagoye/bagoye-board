@@ -3,6 +3,7 @@ package com.bagoye.board.repository;
 import com.bagoye.board.entity.FavoriteEntity;
 import com.bagoye.board.entity.primaryKey.FavoritePk;
 import com.bagoye.board.repository.resultSet.GetFavoriteListResultSet;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -28,4 +29,6 @@ public interface FavoriteRepository extends JpaRepository<FavoriteEntity, Favori
     )
     List<GetFavoriteListResultSet> getFavoriteList(Integer boardNumber);
 
+    @Transactional
+    void deleteByBoardNumber(Integer boardNumber);
 }
