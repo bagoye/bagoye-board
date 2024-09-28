@@ -1,5 +1,6 @@
 package com.bagoye.board.controller;
 
+import com.bagoye.board.dto.request.board.PatchBoardRequestDto;
 import com.bagoye.board.dto.request.board.PostBoardRequestDto;
 import com.bagoye.board.dto.request.board.PostCommentRequestDto;
 import com.bagoye.board.dto.response.board.*;
@@ -75,6 +76,16 @@ public class BoardController {
             @AuthenticationPrincipal String email
     ){
         ResponseEntity<? super PutFavoriteResponseDto> response = boardService.putFavorite(boardNumber, email);
+        return response;
+    }
+
+    @PatchMapping("/{boardNumber}")
+    public ResponseEntity<? super PatchBoardResponseDto> patchBoard(
+            @RequestBody @Valid PatchBoardRequestDto requestBody,
+            @PathVariable("boardNumber") Integer boardNumber,
+            @AuthenticationPrincipal String email
+    ) {
+        ResponseEntity<? super PatchBoardResponseDto> response = boardService.patchBoard(requestBody, boardNumber, email);
         return response;
     }
 

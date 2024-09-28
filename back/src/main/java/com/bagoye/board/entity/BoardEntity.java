@@ -1,5 +1,6 @@
 package com.bagoye.board.entity;
 
+import com.bagoye.board.dto.request.board.PatchBoardRequestDto;
 import com.bagoye.board.dto.request.board.PostBoardRequestDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -59,5 +60,9 @@ public class BoardEntity {
         this.favoriteCount--;
     }
 
+    public void patchBoard(PatchBoardRequestDto dto) {
+        this.title = dto.getTitle();
+        this.content = dto.getContent();
+    }
 
  }
