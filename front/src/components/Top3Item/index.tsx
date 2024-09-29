@@ -21,13 +21,13 @@ export default function Top3Item({ top3ListItme }: Props) {
 
     // event handler: 게시물 아이템 클릭 이벤트 처리 함수
     const onClickHandler = () => {
-        // navigator(boardNumber);
+        // navigate(boardNumber);
     }
 
 
     // render: Top3 List Item 렌더링
     return (
-        <div className='top-3-list-item' style={{ backgroundImage: `url(${boardTitleImage})`}} onClick={onClickHandler}>
+        <div className='top-3-list-item' style={{ backgroundImage: `url(${boardTitleImage})` }} onClick={onClickHandler}>
             <div className='top-3-list-item-main-box'>
                 <div className='top-3-list-item-top'>
                     <div className='top-3-list-item-profile-box'>
