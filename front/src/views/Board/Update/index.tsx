@@ -4,7 +4,7 @@ import { useBoardStore, useLoginUserStore } from 'stores';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MAIN_PATH } from 'constant';
 import { useCookies } from 'react-cookie';
-import { getBoardResquest } from 'apis';
+import { getBoardRequest } from 'apis';
 import { GetBoardResponseDto } from 'apis/response/board';
 import { ResponseDto } from 'apis/response';
 import { convertUrlsToFile } from 'utils';
@@ -128,7 +128,7 @@ export default function BoardUpdate() {
       return;
     }
     if (!boardNumber) return;
-    getBoardResquest(boardNumber).then(getBoardResponse);
+    getBoardRequest(boardNumber).then(getBoardResponse);
   }, [boardNumber]);
 
   // render: 게시물 수정 화면 컴포넌트 렌더링

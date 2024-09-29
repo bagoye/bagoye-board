@@ -9,7 +9,7 @@ import defaultProfileImage from 'assets/image/default-profile-image.png'
 import { useLoginUserStore } from 'stores';
 import { useNavigate, useParams } from 'react-router-dom';
 import { BOARD_PATH, BOARD_UPDATE_PATH, MAIN_PATH, USER_PATH } from 'constant';
-import { deleteBoardRequest, getBoardResquest, getCommentListRequest, getFavoriteListRequest, increaseViewCountRequest, postCommentRequest, putFavoriteRequest } from 'apis';
+import { deleteBoardRequest, getBoardRequest, getCommentListRequest, getFavoriteListRequest, increaseViewCountRequest, postCommentRequest, putFavoriteRequest } from 'apis';
 import GetBoardResponseDto from 'apis/response/board/get-board.response.dto';
 import { ResponseDto } from 'apis/response';
 import { DeleteBoardResponseDto, GetCommentListResponseDto, GetFavoriteListResponseDto, IncreaseViewCountResponseDto, PostCommentResponseDto, PutFavoriteResponseDto } from 'apis/response/board';
@@ -132,7 +132,7 @@ export default function BoardDetail() {
         navigate(MAIN_PATH());
         return;
       }
-      getBoardResquest(boardNumber).then(getBoardResponse);
+      getBoardRequest(boardNumber).then(getBoardResponse);
     }, [boardNumber])
 
     // render: 게시물 상세 상단 컴포넌트 렌더링
