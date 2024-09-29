@@ -51,6 +51,12 @@ public class BoardController {
         return response;
     }
 
+    @GetMapping("/latest-list")
+    public ResponseEntity<? super GetLatestBoardListResponseDto> getLatestBoardList() {
+        ResponseEntity<? super GetLatestBoardListResponseDto> response = boardService.getLatestBoardList();
+        return response;
+    }
+
     @PostMapping("")
     public ResponseEntity<? super PostBoardResponseDto> postBoard(
             @RequestBody @Valid PostBoardRequestDto requestBody,
