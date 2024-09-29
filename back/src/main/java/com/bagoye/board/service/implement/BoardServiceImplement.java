@@ -5,10 +5,7 @@ import com.bagoye.board.dto.request.board.PostBoardRequestDto;
 import com.bagoye.board.dto.request.board.PostCommentRequestDto;
 import com.bagoye.board.dto.response.ResponseDto;
 import com.bagoye.board.dto.response.board.*;
-import com.bagoye.board.entity.BoardEntity;
-import com.bagoye.board.entity.CommentEntity;
-import com.bagoye.board.entity.FavoriteEntity;
-import com.bagoye.board.entity.ImageEntity;
+import com.bagoye.board.entity.*;
 import com.bagoye.board.repository.*;
 import com.bagoye.board.repository.resultSet.GetBoardResultSet;
 import com.bagoye.board.repository.resultSet.GetCommentListResultSet;
@@ -31,6 +28,7 @@ public class BoardServiceImplement implements BoardService {
     private final ImageRepository imageRepository;
     private final CommentRepository commentRepository;
     private final FavoriteRepository favoriteRepository;
+    private final BoardListViewRepository boardListViewRepository;
 
     @Override
     public ResponseEntity<? super GetBoardResponseDto> getBoard(Integer boardNumber) {
@@ -91,6 +89,21 @@ public class BoardServiceImplement implements BoardService {
         }
 
         return GetCommentListResponseDto.success(resultSets);
+    }
+
+    @Override
+    public ResponseEntity<? super GetLatestBoardListResponseDto> getLatestBoardList() {
+
+        List<BoardListViewEntity> boardListViewEntities = new ArrayList<>();
+
+        try {
+            boardListViewEntities = boardListViewRepository.findByOrderByWriteDatetimeDesc();
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+        return GetLatestBoardListResponseDto.success(boardListViewEntities);
     }
 
     @Override
