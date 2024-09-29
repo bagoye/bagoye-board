@@ -39,7 +39,7 @@ export default function BoardUpdate() {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   // function: 네비게이트 함수
-  const navigator = useNavigate();
+  const navigate = useNavigate();
 
   // function: getBoardResponse 처리 함수
   const getBoardResponse = (responseBody: GetBoardResponseDto | ResponseDto | null) => {
@@ -48,7 +48,7 @@ export default function BoardUpdate() {
     if (code === 'NB') alert('존재하지 않는 게시물입니다.');
     if (code === "DBE") alert('데이터베이스 오류입니다.');
     if (code !== 'SU') {
-      navigator(MAIN_PATH());
+      navigate(MAIN_PATH());
       return;
     }
 
@@ -59,7 +59,7 @@ export default function BoardUpdate() {
     convertUrlsToFile(boardImageList).then(BoardImageFileList => setBoardImageFileList(BoardImageFileList));
 
     if (!loginUser || loginUser.email !== writerEmail) {
-      navigator(MAIN_PATH());
+      navigate(MAIN_PATH());
       return;
     }
   }
@@ -124,7 +124,7 @@ export default function BoardUpdate() {
   useEffect(() => {
     const accessToken = cookies.accessToken;
     if (!accessToken) {
-      navigator(MAIN_PATH());
+      navigate(MAIN_PATH());
       return;
     }
     if (!boardNumber) return;
