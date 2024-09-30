@@ -2,6 +2,7 @@ package com.bagoye.board.service.implement;
 
 import com.bagoye.board.dto.response.ResponseDto;
 import com.bagoye.board.dto.response.user.GetSignInUserResponseDto;
+import com.bagoye.board.dto.response.user.GetUserResponseDto;
 import com.bagoye.board.entity.UserEntity;
 import com.bagoye.board.repository.UserRepository;
 import com.bagoye.board.service.UserService;
@@ -14,6 +15,23 @@ import org.springframework.stereotype.Service;
 public class UserServiceImplement implements UserService {
 
     private final UserRepository userRepository;
+
+    @Override
+    public ResponseEntity<? super GetUserResponseDto> getUser(String email) {
+
+        UserEntity userEntity = null;
+
+        try {
+
+            userEntity = userRepository.findByEmail(email);
+            if (userEntity == null) return GetUserResponseDto.noExistUser();
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+        return GetUserResponseDto.success(userEntity);
+    }
 
     @Override
     public ResponseEntity<? super GetSignInUserResponseDto> getSignInUser(String email) {
