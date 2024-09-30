@@ -41,7 +41,7 @@ export default function Search() {
     <div id='search-wrapper'>
       <div className='search-container'>
         <div className='search-title-box'>
-          <div className='search-title'><span className='emphasis'>{searchWord}</span>{'에 대한 검색결과 입니다.'}</div>
+          <div className='search-title'><span className='search-title-emphasis'>{searchWord}</span>{'에 대한 검색결과 입니다.'}</div>
           <div className='search-count'>{count}</div>
         </div>
         <div className='search-contents-box'>
@@ -52,9 +52,9 @@ export default function Search() {
           <div className='search-relation-box'>
             <div className='search-ralation-card'>
               <div className='search-ralation-card-container'>
-                <div className='search-ralation-card-title'></div>
+                <div className='search-ralation-card-title'>{'관련 검색어'}</div>
                 {relationList.length === 0 ?
-                  <div className='search-relation-card-contents-nothing'></div> :
+                  <div className='search-relation-card-contents-nothing'>{'관련 검색어가 없습니다.'}</div> :
                   <div className='search-ralation-card-contents'>
                     {relationList.map(word => <div className='word-badge' onClick={() => onRelationWordClickHandler(word)}>{word}</div>)}
                   </div>
@@ -64,7 +64,8 @@ export default function Search() {
           </div>
         </div>
         <div className='search-pagination-box'>
-          {/* <Pagination /> */}
+          {/* {count !== 0 && <Pagination />} */}
+          
         </div>
       </div>
     </div>
