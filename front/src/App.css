@@ -131,6 +131,15 @@
     justify-self: center;
 }
 
+.icon-box-large {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-self: center;
+}
+
 .icon-button {
     border-radius: 50% 50%;
     width: 24px;
@@ -233,4 +242,13 @@
 
 .comment-icon {
     background-image: url(assets/image/chat-light.png);
+}
+
+.edit-light-icon {
+    background-image: url(assets/image/edit-light.png);
+}
+
+
+.image-box-white-icon {
+    background-image: url(assets/image/image-box-white-light.png);
 }
