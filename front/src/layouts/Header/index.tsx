@@ -108,7 +108,7 @@ export default function Header() {
         // render 검색 버튼 컴포넌트 렌더링 (클릭 true 상태)
         return (
             <div className='header-search-input-box'>
-                <input className='header-search-input' type='text' placeholder='검색어를 입력해주세요.' value={searchWord} onChange={onSearchWordChangeHandler} onKeyDown={onSearchWordKeyDownHandler} />
+                <input className='header-search-input' type='text' placeholder='검색어를 입력해주세요.' value={word} onChange={onSearchWordChangeHandler} onKeyDown={onSearchWordKeyDownHandler} />
                 <div ref={searchButtondRef} className='icon-button' onClick={onSearchButtonClickHandler}>
                     <div className='icon search-light-icon'></div>
                 </div>
