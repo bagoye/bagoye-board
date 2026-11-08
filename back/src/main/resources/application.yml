@@ -30,3 +30,6 @@ jwt:
 
 file.path: /Users/yiisuyeon/Desktop/fileUpload/
 file.url: http://localhost:8080/file/
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
