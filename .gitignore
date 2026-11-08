@@ -1,0 +1,10 @@
+# Gradle / build
+back/.gradle/
+back/build/
+# IDE / OS
+.idea/
+back/.idea/
+.DS_Store
+# Frontend
+front/node_modules/
+front/build/
