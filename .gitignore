@@ -7,4 +7,11 @@ back/.idea/
 .DS_Store
 # Frontend
 front/node_modules/
-front/build/
+front/build/# Secrets / local env (실제 값은 커밋 금지, 템플릿만 추적)
+.env
+.env.*
+!.env.example
+back/src/main/resources/application-local.yml
+*.pem
+*.p12
+*.jks

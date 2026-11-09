@@ -13,6 +13,7 @@ Spring Boot와 React로 만든 게시판 애플리케이션입니다. 회원 인
 5. [보안 이벤트 로그 API](#보안-이벤트-로그-api)
 6. [테스트](#테스트)
 7. [알려진 한계](#알려진-한계)
+8. [비밀값 노출 대응 현황](#비밀값-노출-대응-현황)
 
 ## 개발 환경
 
@@ -93,6 +94,8 @@ GRANT ALL PRIVILEGES ON db_bagoye.* TO 'bagoye'@'localhost';
 | `FILE_PATH` | ✅ | 업로드 파일 저장 디렉토리 (끝에 `/` 포함) | |
 | `FILE_URL` | | 업로드 파일 접근 URL 접두어 | `http://localhost:8080/file/` |
 | `CORS_ALLOWED_ORIGINS` | | 허용할 프론트엔드 출처 (쉼표 구분, `*` 불가) | `http://localhost:3000` |
+
+변수 목록은 루트의 `.env.example`에도 정리되어 있습니다. Spring Boot는 `.env` 파일을 자동으로 읽지 않으므로 셸 환경변수나 IDE 실행 설정으로 주입하세요. 값을 채운 `.env` 파일은 `.gitignore`로 커밋에서 제외됩니다.
 
 JWT 키 생성 예시:
 
@@ -182,7 +185,7 @@ CREATE TABLE security_event (
 
 | 위협 | 기존 상태 | 대응 | 관련 코드 위치 |
 |---|---|---|---|
-| **비밀값 노출** | `application.yml`에 DB 비밀번호와 JWT 키가 평문으로 커밋됨 | 환경변수로 분리하고 기본값을 두지 않아 미설정 시 기동 실패. 기존 값은 폐기·교체 | `resources/application.yml` |
+| **비밀값 노출** | `application.yml`에 DB 비밀번호와 JWT 키가 평문으로 커밋됨 | 환경변수로 분리하고 기본값을 두지 않아 미설정 시 기동 실패. 기존 값의 교체·히스토리 정리 상태는 [비밀값 노출 대응 현황](#비밀값-노출-대응-현황) 참고 | `resources/application.yml` |
 | **JWT 위조** (약한 서명 키) | 키 길이 검증 없음. 검증 실패를 `printStackTrace()`로만 출력 | 키가 32바이트(HS256 권장 길이) 미만이면 기동 시 예외. 실패를 만료/서명 오류/형식 오류로 구분해 기록 | `provider/JwtProvider.java` |
 | **탈취 토큰 장기 악용** | 유효기간 1시간인 단일 토큰 | Access Token 30분 + Refresh Token 7일. Refresh Token은 난수 값의 SHA-256 해시만 DB에 저장하고, 재발급 시마다 폐기·재발급(1회용 회전). 삭제된 행 수를 확인해 동시 재사용 차단 | `provider/RefreshTokenProvider.java`, `service/implement/AuthServiceImplement.java` (`refresh`) |
 | **CORS 오용** | 모든 출처 허용 (`*`) | 환경변수에 지정한 출처만 허용. `*` 설정 시 기동 실패. 허용 메서드·헤더를 필요한 것으로 제한 | `config/WebSecurityConfig.java` |
@@ -329,3 +332,23 @@ cd back
 - **비동기 기록의 유실 가능성:** 이벤트가 폭주해 큐가 가득 차면 초과 이벤트는 버려집니다(가용성 우선 설계).
 - **통계 API는 MySQL 전용:** 통계 쿼리가 MySQL 함수(`DATE_FORMAT`)를 사용해 H2 기반 자동 테스트로는 검증하지 않았습니다.
 - **관리자 화면 미구현:** 보안 이벤트는 API로만 조회할 수 있습니다.
+
+## 비밀값 노출 대응 현황
+
+과거 커밋의 `back/src/main/resources/application.yml`과, 실수로 커밋되었던 빌드 산출물 `back/build/resources/main/application.yml`에 MySQL 비밀번호와 JWT 서명 키(이전 키 포함)가 평문으로 남아 있었습니다. 최초 커밋부터 환경변수 분리 직전 커밋까지 해당됩니다.
+
+### 완료한 조치
+
+- DB 비밀번호와 JWT 키를 환경변수(`DB_PASSWORD`, `JWT_SECRET_KEY`)로 분리하고 기본값을 제거
+- 현재 코드에 기존 비밀값이 남아 있지 않음을 확인 (테스트 프로파일의 JWT 키는 H2 테스트 전용 더미 값)
+- `.gitignore`에 `.env`, `.env.*`, `application-local.yml`, 인증서·키스토어 파일 추가
+- 비밀값 없는 환경변수 템플릿 `.env.example` 추가
+- **로컬 개발 DB 비밀번호 교체** (2026-11-09): 교체 전 기존 비밀번호가 여전히 유효했음을 확인. 교체 후 새 값으로 앱 기동 확인
+- **JWT 서명 키 교체** (2026-11-09): 새 키로 앱 기동 확인. 기존 키로 서명된 토큰은 무효
+- **Git 히스토리 정리** (2026-11-09): `git-filter-repo --replace-text`로 모든 과거 커밋의 비밀값을 `${DB_PASSWORD}`, `${JWT_SECRET_KEY}` 자리표시자로 치환하고 `main`, `security-hardening`에 강제 푸시. 원격 저장소를 새로 클론해 기존 비밀값이 0건임을 확인. 커밋 메시지·작성자·날짜와 최신 코드는 변경되지 않음(커밋 해시는 변경됨)
+
+### 남아 있는 위험
+
+- **운영·배포 환경:** 배포 서버나 별도 DB가 있었다면 해당 환경의 비밀번호와 키는 이 조치로 교체되지 않았습니다.
+- **외부 사본:** 재작성 전에 만들어진 클론·포크와, GitHub이 캐시한 옛 커밋(해시를 알면 조회 가능)에는 원본이 남아 있을 수 있습니다. 옛 값은 이미 교체되어 무효이지만, 완전 삭제가 필요하면 GitHub Support에 캐시 삭제를 요청해야 합니다.
+- **DB 사용자명:** 과거 커밋에 DB 계정 이름은 남아 있습니다(비밀값은 아님).
