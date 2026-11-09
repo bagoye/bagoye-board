@@ -21,8 +21,8 @@ spring:
   # 파일 업로드 설정
   servlet:
     multipart:
-      max-file-size: 100MB
-      max-request-size: 110MB
+      max-file-size: 10MB
+      max-request-size: 11MB   # multipart 경계·헤더 오버헤드 여유분
       enabled: true
 
 jwt:

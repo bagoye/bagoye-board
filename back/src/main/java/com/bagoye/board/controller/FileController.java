@@ -1,9 +1,10 @@
 package com.bagoye.board.controller;
 
+import com.bagoye.board.common.ImageFileType;
 import com.bagoye.board.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,11 +23,16 @@ public class FileController {
         return url;
     }
 
-    @GetMapping(value = "{fileName}", produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE})
-    public Resource getImage(
+    @GetMapping("{fileName}")
+    public ResponseEntity<Resource> getImage(
             @PathVariable("fileName") String fileName
     ) {
         Resource resource = fileService.getImage(fileName);
-        return resource;
+        if (resource == null) return ResponseEntity.notFound().build();
+
+        ImageFileType imageFileType = ImageFileType.fromFileName(fileName);
+        return ResponseEntity.ok()
+                .contentType(imageFileType.getMediaType())
+                .body(resource);
     }
 }
