@@ -6,8 +6,8 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/db_bagoye?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: bagoye
+    url: ${DB_URL:jdbc:mysql://localhost:3306/db_bagoye?serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
+    username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
   # spring data jpa 설정
@@ -30,8 +30,8 @@ jwt:
   access-token-expiration-minutes: 30
   refresh-token-expiration-days: 7
 
-file.path: /Users/yiisuyeon/Desktop/fileUpload/
-file.url: http://localhost:8080/file/
+file.path: ${FILE_PATH}
+file.url: ${FILE_URL:http://localhost:8080/file/}
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
