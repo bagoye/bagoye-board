@@ -1,7 +1,9 @@
 package com.bagoye.board.controller;
 
+import com.bagoye.board.dto.request.auth.RefreshRequestDto;
 import com.bagoye.board.dto.request.auth.SignInRequestDto;
 import com.bagoye.board.dto.request.auth.SignUpRequestDto;
+import com.bagoye.board.dto.response.auth.RefreshResponseDto;
 import com.bagoye.board.dto.response.auth.SignInResponseDto;
 import com.bagoye.board.dto.response.auth.SignUpResponseDto;
 import com.bagoye.board.service.AuthService;
@@ -33,6 +35,14 @@ public class AuthController {
             @RequestBody @Valid SignInRequestDto requestBody
     ) {
         ResponseEntity<? super SignInResponseDto> response = authService.signIn(requestBody);
+        return response;
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<? super RefreshResponseDto> refresh(
+            @RequestBody @Valid RefreshRequestDto requestBody
+    ) {
+        ResponseEntity<? super RefreshResponseDto> response = authService.refresh(requestBody);
         return response;
     }
 }

@@ -12,15 +12,19 @@ public class SignInResponseDto extends ResponseDto {
 
     private String token;
     private int expirationTime;
+    private String refreshToken;
+    private int refreshExpirationTime;
 
-    private SignInResponseDto(String token) {
+    private SignInResponseDto(String token, int expirationTime, String refreshToken, int refreshExpirationTime) {
         super(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
         this.token = token;
-        this.expirationTime = 3600;
+        this.expirationTime = expirationTime;
+        this.refreshToken = refreshToken;
+        this.refreshExpirationTime = refreshExpirationTime;
     }
 
-    public static ResponseEntity<SignInResponseDto> success(String token) {
-        SignInResponseDto result = new SignInResponseDto(token);
+    public static ResponseEntity<SignInResponseDto> success(String token, int expirationTime, String refreshToken, int refreshExpirationTime) {
+        SignInResponseDto result = new SignInResponseDto(token, expirationTime, refreshToken, refreshExpirationTime);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 

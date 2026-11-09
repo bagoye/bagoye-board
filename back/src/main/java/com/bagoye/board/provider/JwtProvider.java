@@ -28,6 +28,9 @@ public class JwtProvider {
     @Value("${jwt.secret-key}")
     private String secretKey;
 
+    @Value("${jwt.access-token-expiration-minutes:30}")
+    private long accessTokenExpirationMinutes;
+
     private Key key;
 
     @PostConstruct
@@ -41,7 +44,7 @@ public class JwtProvider {
     }
 
     public String create(String email) {
-        Date expiredDate = Date.from(Instant.now().plus(1, ChronoUnit.HOURS));
+        Date expiredDate = Date.from(Instant.now().plus(accessTokenExpirationMinutes, ChronoUnit.MINUTES));
 
         String jwt = Jwts.builder()
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -51,6 +54,10 @@ public class JwtProvider {
                 .compact();
 
         return jwt;
+    }
+
+    public int getAccessTokenExpirationSeconds() {
+        return (int) (accessTokenExpirationMinutes * 60);
     }
 
     public String validate(String jwt) {
