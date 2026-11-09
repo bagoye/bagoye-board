@@ -1,5 +1,7 @@
 package com.bagoye.board.service.implement;
 
+import com.bagoye.board.audit.SecurityEventRecorder;
+import com.bagoye.board.common.SecurityEventType;
 import com.bagoye.board.dto.request.board.PatchBoardRequestDto;
 import com.bagoye.board.dto.request.board.PostBoardRequestDto;
 import com.bagoye.board.dto.request.board.PostCommentRequestDto;
@@ -34,6 +36,7 @@ public class BoardServiceImplement implements BoardService {
     private final FavoriteRepository favoriteRepository;
     private final SearchLogRepository searchLogRepository;
     private final BoardListViewRepository boardListViewRepository;
+    private final SecurityEventRecorder securityEventRecorder;
 
     @Override
     public ResponseEntity<? super GetBoardResponseDto> getBoard(Integer boardNumber) {
@@ -275,7 +278,11 @@ public class BoardServiceImplement implements BoardService {
 
             String writerEmail = boardEntity.getWriterEmail();
             boolean isWriter = writerEmail.equals(email);
-            if (!isWriter) return PatchBoardResponseDto.noPermission();
+            if (!isWriter) {
+                securityEventRecorder.record(SecurityEventType.ACCESS_DENIED, email,
+                        "patch-board-not-writer, boardNumber=" + boardNumber);
+                return PatchBoardResponseDto.noPermission();
+            }
 
             boardEntity.patchBoard(dto);
             boardRepository.save(boardEntity);
@@ -324,7 +331,11 @@ public class BoardServiceImplement implements BoardService {
 
             String writerEmail = boardEntity.getWriterEmail();
             boolean isWriter = writerEmail.equals(email);
-            if (!isWriter) return DeleteBoardResponseDto.noPermission();
+            if (!isWriter) {
+                securityEventRecorder.record(SecurityEventType.ACCESS_DENIED, email,
+                        "delete-board-not-writer, boardNumber=" + boardNumber);
+                return DeleteBoardResponseDto.noPermission();
+            }
 
             imageRepository.deleteByBoardNumber(boardNumber);
             commentRepository.deleteByBoardNumber(boardNumber);

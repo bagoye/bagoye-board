@@ -1,6 +1,8 @@
 package com.bagoye.board.filter;
 
+import com.bagoye.board.audit.SecurityEventRecorder;
 import com.bagoye.board.common.Role;
+import com.bagoye.board.common.SecurityEventType;
 import com.bagoye.board.entity.UserEntity;
 import com.bagoye.board.provider.JwtProvider;
 import com.bagoye.board.repository.UserRepository;
@@ -31,6 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
     private final UserRepository userRepository;
+    private final SecurityEventRecorder securityEventRecorder;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -53,7 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             UserEntity userEntity = userRepository.findByEmail(email);
             if (userEntity == null) {
-                log.warn("[AUTH] Valid token for non-existent user.");
+                securityEventRecorder.record(SecurityEventType.INVALID_TOKEN, email, "token-for-non-existent-user");
                 filterChain.doFilter(request, response);
                 return;
             }

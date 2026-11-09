@@ -1,8 +1,11 @@
 package com.bagoye.board.service.implement;
 
+import com.bagoye.board.audit.SecurityEventRecorder;
 import com.bagoye.board.common.ImageFileType;
+import com.bagoye.board.common.SecurityEventType;
 import com.bagoye.board.service.FileService;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -22,7 +25,10 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class FileServiceImplement implements FileService {
+
+    private final SecurityEventRecorder securityEventRecorder;
 
     @Value("${file.path}")
     private String filePath;
@@ -48,15 +54,16 @@ public class FileServiceImplement implements FileService {
         String originalFileName = file.getOriginalFilename();
         ImageFileType imageFileType = ImageFileType.fromFileName(originalFileName);
         if (imageFileType == null) {
-            log.warn("[FILE] Upload rejected: disallowed extension. fileName={}", sanitizeForLog(originalFileName));
+            securityEventRecorder.record(SecurityEventType.UPLOAD_BLOCKED, null,
+                    "disallowed-extension: " + originalFileName);
             return null;
         }
 
         try (InputStream inputStream = file.getInputStream()) {
             byte[] header = inputStream.readNBytes(ImageFileType.SIGNATURE_LENGTH);
             if (!imageFileType.matches(header)) {
-                log.warn("[FILE] Upload rejected: file signature does not match extension. fileName={}",
-                        sanitizeForLog(originalFileName));
+                securityEventRecorder.record(SecurityEventType.UPLOAD_BLOCKED, null,
+                        "signature-mismatch: " + originalFileName);
                 return null;
             }
         } catch (IOException exception) {
@@ -87,12 +94,12 @@ public class FileServiceImplement implements FileService {
                 || fileName.contains("/")
                 || fileName.contains("\\")
                 || fileName.indexOf('\0') >= 0) {
-            log.warn("[FILE] Path traversal attempt blocked. fileName={}", sanitizeForLog(fileName));
+            securityEventRecorder.record(SecurityEventType.FILE_ACCESS_BLOCKED, null, "path-traversal: " + fileName);
             return null;
         }
 
         if (ImageFileType.fromFileName(fileName) == null) {
-            log.warn("[FILE] Disallowed file type requested. fileName={}", sanitizeForLog(fileName));
+            securityEventRecorder.record(SecurityEventType.FILE_ACCESS_BLOCKED, null, "disallowed-type: " + fileName);
             return null;
         }
 
@@ -100,12 +107,12 @@ public class FileServiceImplement implements FileService {
         try {
             targetPath = uploadDirectory.resolve(fileName).normalize();
         } catch (InvalidPathException exception) {
-            log.warn("[FILE] Invalid path requested. fileName={}", sanitizeForLog(fileName));
+            securityEventRecorder.record(SecurityEventType.FILE_ACCESS_BLOCKED, null, "invalid-path: " + fileName);
             return null;
         }
 
         if (!targetPath.startsWith(uploadDirectory)) {
-            log.warn("[FILE] Access outside upload directory blocked. fileName={}", sanitizeForLog(fileName));
+            securityEventRecorder.record(SecurityEventType.FILE_ACCESS_BLOCKED, null, "outside-upload-dir: " + fileName);
             return null;
         }
 
@@ -117,11 +124,5 @@ public class FileServiceImplement implements FileService {
             log.error("[FILE] Failed to load file.", exception);
             return null;
         }
-    }
-
-    private static String sanitizeForLog(String value) {
-        if (value == null) return "null";
-        String sanitized = value.replaceAll("[\\r\\n\\t]", "_");
-        return sanitized.length() > 100 ? sanitized.substring(0, 100) + "..." : sanitized;
     }
 }

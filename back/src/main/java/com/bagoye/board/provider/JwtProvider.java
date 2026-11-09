@@ -1,5 +1,7 @@
 package com.bagoye.board.provider;
 
+import com.bagoye.board.audit.SecurityEventRecorder;
+import com.bagoye.board.common.SecurityEventType;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -9,6 +11,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -21,9 +24,12 @@ import java.util.Date;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class JwtProvider {
 
     private static final int MIN_SECRET_KEY_BYTES = 32; // HS256 = 256bit
+
+    private final SecurityEventRecorder securityEventRecorder;
 
     @Value("${jwt.secret-key}")
     private String secretKey;
@@ -71,15 +77,16 @@ public class JwtProvider {
         } catch (ExpiredJwtException exception) {
             log.info("[JWT] Expired token.");
         } catch (io.jsonwebtoken.security.SecurityException exception) {
-            log.warn("[JWT] Invalid signature. Possible token forgery attempt.");
+            securityEventRecorder.record(SecurityEventType.INVALID_TOKEN, null, "invalid-signature");
         } catch (MalformedJwtException exception) {
-            log.warn("[JWT] Malformed token.");
+            securityEventRecorder.record(SecurityEventType.INVALID_TOKEN, null, "malformed");
         } catch (UnsupportedJwtException exception) {
-            log.warn("[JWT] Unsupported token.");
+            securityEventRecorder.record(SecurityEventType.INVALID_TOKEN, null, "unsupported");
         } catch (IllegalArgumentException exception) {
-            log.warn("[JWT] Empty token.");
+            securityEventRecorder.record(SecurityEventType.INVALID_TOKEN, null, "empty");
         } catch (JwtException exception) {
-            log.warn("[JWT] Invalid token: {}", exception.getClass().getSimpleName());
+            securityEventRecorder.record(SecurityEventType.INVALID_TOKEN, null,
+                    "invalid: " + exception.getClass().getSimpleName());
         }
         return null;
     }

@@ -1,5 +1,7 @@
 package com.bagoye.board.service.implement;
 
+import com.bagoye.board.audit.SecurityEventRecorder;
+import com.bagoye.board.common.SecurityEventType;
 import com.bagoye.board.dto.request.auth.RefreshRequestDto;
 import com.bagoye.board.dto.request.auth.SignInRequestDto;
 import com.bagoye.board.dto.request.auth.SignUpRequestDto;
@@ -31,6 +33,7 @@ public class AuthServiceImplement implements AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtProvider jwtProvider;
     private final RefreshTokenProvider refreshTokenProvider;
+    private final SecurityEventRecorder securityEventRecorder;
 
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -88,13 +91,13 @@ public class AuthServiceImplement implements AuthService {
             UserEntity userEntity = userRepository.findWithLockByEmail(email);
             if (userEntity == null) {
                 passwordEncoder.matches(password, dummyPasswordHash);
-                log.warn("[AUTH] Sign-in failed. reason=unknown-email");
+                securityEventRecorder.record(SecurityEventType.LOGIN_FAILED, email, "unknown-email");
                 return SignInResponseDto.signInFailed();
             }
 
             if (userEntity.isLocked()) {
-                log.warn("[AUTH] Sign-in blocked: account locked. email={}, lockedUntil={}",
-                        email, userEntity.getLockedUntil());
+                securityEventRecorder.record(SecurityEventType.ACCOUNT_LOCKED, email,
+                        "attempt-while-locked, lockedUntil=" + userEntity.getLockedUntil());
                 return SignInResponseDto.accountLocked();
             }
 
@@ -105,12 +108,13 @@ public class AuthServiceImplement implements AuthService {
                 userRepository.save(userEntity);
 
                 if (userEntity.isLocked()) {
-                    log.warn("[AUTH] Account locked after {} failed attempts. email={}", MAX_FAILED_LOGIN_COUNT, email);
+                    securityEventRecorder.record(SecurityEventType.ACCOUNT_LOCKED, email,
+                            "locked-after-" + MAX_FAILED_LOGIN_COUNT + "-failures");
                     return SignInResponseDto.accountLocked();
                 }
 
-                log.warn("[AUTH] Sign-in failed. reason=bad-credentials, email={}, failedCount={}",
-                        email, userEntity.getFailedLoginCount());
+                securityEventRecorder.record(SecurityEventType.LOGIN_FAILED, email,
+                        "bad-credentials, failedCount=" + userEntity.getFailedLoginCount());
                 return SignInResponseDto.signInFailed();
             }
 
@@ -144,14 +148,15 @@ public class AuthServiceImplement implements AuthService {
             String tokenHash = refreshTokenProvider.hash(dto.getRefreshToken());
             RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findByTokenHash(tokenHash);
             if (refreshTokenEntity == null) {
-                log.warn("[AUTH] Unknown or already used refresh token.");
+                securityEventRecorder.record(SecurityEventType.INVALID_TOKEN, null, "refresh-token-unknown-or-reused");
                 return RefreshResponseDto.refreshFailed();
             }
 
             // 1회용: 먼저 삭제하고, 삭제된 행이 없으면 동시 재사용으로 간주
             int deleted = refreshTokenRepository.deleteByTokenHash(tokenHash);
             if (deleted == 0) {
-                log.warn("[AUTH] Concurrent refresh token reuse detected. user={}", refreshTokenEntity.getUserEmail());
+                securityEventRecorder.record(SecurityEventType.INVALID_TOKEN, refreshTokenEntity.getUserEmail(),
+                        "refresh-token-concurrent-reuse");
                 return RefreshResponseDto.refreshFailed();
             }
 
