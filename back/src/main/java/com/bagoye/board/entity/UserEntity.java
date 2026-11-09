@@ -1,8 +1,11 @@
 package com.bagoye.board.entity;
 
+import com.bagoye.board.common.Role;
 import com.bagoye.board.dto.request.auth.SignUpRequestDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -32,6 +35,10 @@ public class UserEntity {
     private int failedLoginCount;
     private LocalDateTime lockedUntil;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "VARCHAR(10) NOT NULL DEFAULT 'USER'")
+    private Role role;
+
     public UserEntity(SignUpRequestDto dto) {
         this.email = dto.getEmail();
         this.password = dto.getPassword();
@@ -41,6 +48,7 @@ public class UserEntity {
         this.addressDetail = dto.getAddressDetail();
         this.agreedPersonal = dto.getAgreedPersonal();
         this.failedLoginCount = 0;
+        this.role = Role.USER;
     }
 
     public void setNickname(String nickname) {
