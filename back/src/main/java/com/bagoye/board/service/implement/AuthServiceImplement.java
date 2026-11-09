@@ -34,6 +34,12 @@ public class AuthServiceImplement implements AuthService {
 
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    private static final int MAX_FAILED_LOGIN_COUNT = 5;
+    private static final long LOCK_MINUTES = 15;
+
+    // 존재하지 않는 이메일에도 BCrypt 비교를 수행해 응답 시간 차이로 계정이 드러나지 않게 함
+    private final String dummyPasswordHash = passwordEncoder.encode("dummy-password-for-timing-equalization");
+
 
     @Override
     public ResponseEntity<? super SignUpResponseDto> signUp(SignUpRequestDto dto) {
@@ -68,6 +74,7 @@ public class AuthServiceImplement implements AuthService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<? super SignInResponseDto> signIn(SignInRequestDto dto) {
 
         String accessToken = null;
@@ -76,19 +83,47 @@ public class AuthServiceImplement implements AuthService {
         try {
 
             String email = dto.getEmail();
-            UserEntity userEntity = userRepository.findByEmail(email);
-            if (userEntity == null) return SignInResponseDto.signInFailed();
-
             String password = dto.getPassword();
+
+            UserEntity userEntity = userRepository.findWithLockByEmail(email);
+            if (userEntity == null) {
+                passwordEncoder.matches(password, dummyPasswordHash);
+                log.warn("[AUTH] Sign-in failed. reason=unknown-email");
+                return SignInResponseDto.signInFailed();
+            }
+
+            if (userEntity.isLocked()) {
+                log.warn("[AUTH] Sign-in blocked: account locked. email={}, lockedUntil={}",
+                        email, userEntity.getLockedUntil());
+                return SignInResponseDto.accountLocked();
+            }
+
             String encodedPassword = userEntity.getPassword();
             boolean isMatched = passwordEncoder.matches(password, encodedPassword);
-            if(!isMatched) return SignInResponseDto.signInFailed();
+            if (!isMatched) {
+                userEntity.increaseFailedLoginCount(MAX_FAILED_LOGIN_COUNT, LOCK_MINUTES);
+                userRepository.save(userEntity);
+
+                if (userEntity.isLocked()) {
+                    log.warn("[AUTH] Account locked after {} failed attempts. email={}", MAX_FAILED_LOGIN_COUNT, email);
+                    return SignInResponseDto.accountLocked();
+                }
+
+                log.warn("[AUTH] Sign-in failed. reason=bad-credentials, email={}, failedCount={}",
+                        email, userEntity.getFailedLoginCount());
+                return SignInResponseDto.signInFailed();
+            }
+
+            if (userEntity.getFailedLoginCount() > 0 || userEntity.getLockedUntil() != null) {
+                userEntity.resetFailedLoginCount();
+                userRepository.save(userEntity);
+            }
 
             accessToken = jwtProvider.create(email);
             refreshToken = issueRefreshToken(email);
 
         } catch (Exception exception) {
-            exception.printStackTrace();
+            log.error("[AUTH] Sign-in error.", exception);
             return ResponseDto.databaseError();
         }
 

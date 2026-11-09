@@ -32,4 +32,9 @@ public class SignInResponseDto extends ResponseDto {
         ResponseDto result = new ResponseDto(ResponseCode.SIGN_IN_FAIL, ResponseMessage.SIGN_IN_FAIL);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
     }
+
+    public static ResponseEntity<ResponseDto> accountLocked() {
+        ResponseDto result = new ResponseDto(ResponseCode.ACCOUNT_LOCKED, ResponseMessage.ACCOUNT_LOCKED);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
+    }
 }
