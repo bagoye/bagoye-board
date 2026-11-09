@@ -1,0 +1,24 @@
+# 테스트 전용 프로파일: MySQL 대신 인메모리 H2 사용
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    # 컨텍스트마다 별도 DB (테스트 클래스 간 데이터 간섭 방지)
+    # NON_KEYWORDS=USER : H2 예약어인 user 테이블명을 허용
+    url: jdbc:h2:mem:bagoye-${random.uuid};MODE=MySQL;DATABASE_TO_LOWER=TRUE;NON_KEYWORDS=USER;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: false
+    hibernate:
+      ddl-auto: create-drop
+
+jwt:
+  secret-key: test-only-secret-key-at-least-32-bytes-long
+
+cors:
+  allowed-origins: http://localhost:3000
+
+file.path: ${java.io.tmpdir}/bagoye-test-upload/
+file.url: http://localhost:8080/file/
