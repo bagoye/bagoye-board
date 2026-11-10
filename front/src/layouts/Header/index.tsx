@@ -194,7 +194,10 @@ export default function Header() {
         // event handler: 업로드 버튼 클릭 이벤트 처리
         const onUploadButtonClickHandler = async () => {
             const accessToken = cookies.accessToken;
-            if (!accessToken) return;
+            if (!accessToken) {
+                navigate(AUTH_PATH());
+                return;
+            }
 
             const boardImageList: string[] = [];
 

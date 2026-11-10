@@ -1,6 +1,10 @@
 package com.bagoye.board.config;
 
 import com.bagoye.board.filter.JwtAuthenticationFilter;
+import com.bagoye.board.common.ResponseCode;
+import com.bagoye.board.common.ResponseMessage;
+import com.bagoye.board.dto.response.ResponseDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,6 +38,7 @@ public class WebSecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final NoPermissionAccessDeniedHandler noPermissionAccessDeniedHandler;
+    private final ObjectMapper objectMapper;
 
     @Value("${cors.allowed-origins}")
     private String[] allowedOrigins;
@@ -55,7 +60,7 @@ public class WebSecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint(new FailedAuthenticationEntryPoint())
+                        .authenticationEntryPoint(new FailedAuthenticationEntryPoint(objectMapper))
                         .accessDeniedHandler(noPermissionAccessDeniedHandler)
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -88,7 +93,10 @@ public class WebSecurityConfig {
     }
 }
 
+@RequiredArgsConstructor
 class FailedAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+    private final ObjectMapper objectMapper;
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
@@ -96,6 +104,7 @@ class FailedAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.getWriter().write("{ \"code:\": \"AF\", \"message\": \"Authorizaion Failed\"}");
+        objectMapper.writeValue(response.getOutputStream(),
+                new ResponseDto(ResponseCode.AUTHORIZATION_FAIL, ResponseMessage.AUTHORIZATION_FAIL));
     }
 }

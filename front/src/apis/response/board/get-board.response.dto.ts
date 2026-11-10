@@ -1,5 +1,5 @@
 import { Board } from "types/interface";
-import ResponseDto from "../response.dto";
+import ResponseDto from "../Response.dto";
 
 export default interface GetBoardResponseDto extends ResponseDto, Board {
     
